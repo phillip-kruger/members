@@ -37,7 +37,7 @@ mutation NewMember{
 
 ```
 mutation disableMember {
-  disableMember(id:"ebcc362e-487e-4273-b504-4500e4f51421"){
+  disableMember(memberId:"ebcc362e-487e-4273-b504-4500e4f51421"){
     id
     name
     enabled
@@ -45,10 +45,40 @@ mutation disableMember {
 }
 
 mutation enableMember {
-  enableMember(id:"ebcc362e-487e-4273-b504-4500e4f51421"){
+  enableMember(memberId:"ebcc362e-487e-4273-b504-4500e4f51421"){
     id
     name
     enabled
+  }
+}
+```
+
+#### Add/Remove Membership types
+
+```
+mutation addMembershipType {
+  addMembershipType(memberId:"ebcc362e-487e-4273-b504-4500e4f51421",groupId:"09b3bf8f-284c-4b9c-ac06-39ed4c79361b"){
+    id
+    name
+    enabled
+    membershipTypes{
+      id
+      name
+      description
+    }
+  }
+}
+
+mutation removeMembershipType {
+  removeMembershipType(memberId:"ebcc362e-487e-4273-b504-4500e4f51421",groupId:"32821dba-c8aa-474d-ade2-4ca5e39a20bd"){
+    id
+    name
+    enabled
+    membershipTypes{
+      id
+      name
+      description
+    }
   }
 }
 ```

@@ -1,7 +1,6 @@
 package technology.overcast;
 
 import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.admin.client.KeycloakBuilder;

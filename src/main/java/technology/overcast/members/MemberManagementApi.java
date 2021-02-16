@@ -16,7 +16,6 @@ import java.util.Optional;
 import java.util.Set;
 import javax.inject.Inject;
 import javax.validation.Valid;
-import javax.validation.constraints.Email;
 import javax.ws.rs.core.Response;
 import org.eclipse.microprofile.graphql.GraphQLApi;
 import org.eclipse.microprofile.graphql.Mutation;
@@ -48,6 +47,15 @@ public class MemberManagementApi {
         RealmResource clubRealm = keycloak.realm(tenant.getTenant());
         GroupsResource groupsResource = clubRealm.groups();
         return toMembershipTypes(groupsResource.groups());
+    }
+    
+    @Query
+    public MembershipType getMembershipType(String id) {
+        Keycloak keycloak = keycloakClient.getKeycloak();
+        RealmResource clubRealm = keycloak.realm(tenant.getTenant());
+        GroupsResource groupsResource = clubRealm.groups();
+        GroupResource group = groupsResource.group(id);
+        return toMembershipType(group.toRepresentation());
     }
     
     @Query
@@ -163,19 +171,39 @@ public class MemberManagementApi {
     }
     
     @Mutation
-    public Member disableMember(String id){
-        return setEnabled(id,Boolean.FALSE);
+    public Member disableMember(String memberId){
+        return setEnabled(memberId,Boolean.FALSE);
     }
     
     @Mutation
-    public Member enableMember(String id){
-        return setEnabled(id,Boolean.TRUE);
+    public Member enableMember(String memberId){
+        return setEnabled(memberId,Boolean.TRUE);
     }
     
-    private Member setEnabled(String id, Boolean enabled){
+    @Mutation
+    public Member addMembershipType(String memberId, String groupId){
         Keycloak keycloak = keycloakClient.getKeycloak();
         RealmResource clubRealm = keycloak.realm(tenant.getTenant());
-        UserResource userResource = clubRealm.users().get(id);
+        UserResource userResource = clubRealm.users().get(memberId);
+        UserRepresentation user = userResource.toRepresentation();
+        userResource.joinGroup(groupId);
+        return toMember(user);
+    }
+    
+    @Mutation
+    public Member removeMembershipType(String memberId, String groupId){
+        Keycloak keycloak = keycloakClient.getKeycloak();
+        RealmResource clubRealm = keycloak.realm(tenant.getTenant());
+        UserResource userResource = clubRealm.users().get(memberId);
+        UserRepresentation user = userResource.toRepresentation();
+        userResource.leaveGroup(groupId);
+        return toMember(user);
+    }
+    
+    private Member setEnabled(String memberId, Boolean enabled){
+        Keycloak keycloak = keycloakClient.getKeycloak();
+        RealmResource clubRealm = keycloak.realm(tenant.getTenant());
+        UserResource userResource = clubRealm.users().get(memberId);
         UserRepresentation user = userResource.toRepresentation();
         user.setEnabled(enabled);
         userResource.update(user);
