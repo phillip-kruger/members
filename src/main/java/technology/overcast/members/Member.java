@@ -8,7 +8,6 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Past;
 import javax.validation.constraints.Size;
 import org.eclipse.microprofile.graphql.Ignore;
-import org.eclipse.microprofile.graphql.NonNull;
 
 /**
  * Represent a club member
@@ -16,17 +15,21 @@ import org.eclipse.microprofile.graphql.NonNull;
  */
 public class Member {
     private String id;
-    @Size(min = 3, message = "Not a valid user name, it's too short")
+    @NotNull @NotEmpty @Size(min = 3, message = "Not a valid user name, it's too short")
     private String username;
+    @NotNull @NotEmpty 
     private String name;
+    @NotNull @NotEmpty 
     private String surname;
-    @Email(message = "Not a valid email address")
+    @NotNull @NotEmpty @Email(message = "Not a valid email address")
     private String email;
     private LocalDateTime createdAt;
     private Gender gender;
-    @Past(message = "Not a valid birth date") 
+    @NotNull @Past(message = "Not a valid birth date") 
     private LocalDate birthdate;
 
+    private boolean enabled = true; // default
+    
     public String getId() {
         return id;
     }
@@ -39,7 +42,6 @@ public class Member {
         return username;
     }
 
-    @NonNull
     public void setUsername(String username) {
         this.username = username;
     }
@@ -48,7 +50,6 @@ public class Member {
         return name;
     }
 
-    @NonNull
     public void setName(String name) {
         this.name = name;
     }
@@ -57,7 +58,6 @@ public class Member {
         return surname;
     }
 
-    @NonNull
     public void setSurname(String surname) {
         this.surname = surname;
     }
@@ -66,18 +66,8 @@ public class Member {
         return email;
     }
 
-    @NonNull
     public void setEmail(String email) {
         this.email = email;
-    }
-
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
-
-    @Ignore
-    public void setCreatedAt(LocalDateTime createdAt) {
-        this.createdAt = createdAt;
     }
 
     public Gender getGender() {
@@ -92,11 +82,28 @@ public class Member {
         return birthdate;
     }
 
-    @NonNull
     public void setBirthdate(LocalDate birthdate) {
         this.birthdate = birthdate;
     }
 
+    public boolean isEnabled() {
+        return enabled;
+    }
+
+    @Ignore
+    public void setEnabled(boolean enabled) {
+        this.enabled = enabled;
+    }
+    
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    @Ignore
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+    
     @Override
     public String toString() {
         return "Member{" + "id=" + id + ", username=" + username + ", name=" + name + ", surname=" + surname + ", email=" + email + ", createdAt=" + createdAt + ", gender=" + gender + ", birthdate=" + birthdate + '}';

@@ -8,6 +8,7 @@ This project allows member management.
 
 ### Mutations
 
+#### Create new Member
 ```
 mutation NewMember{
   createMember(member:
@@ -28,6 +29,26 @@ mutation NewMember{
     birthdate
     gender
     createdAt    
+  }
+}
+```
+
+#### Enable/Disable Member
+
+```
+mutation disableMember {
+  disableMember(id:"ebcc362e-487e-4273-b504-4500e4f51421"){
+    id
+    name
+    enabled
+  }
+}
+
+mutation enableMember {
+  enableMember(id:"ebcc362e-487e-4273-b504-4500e4f51421"){
+    id
+    name
+    enabled
   }
 }
 ```

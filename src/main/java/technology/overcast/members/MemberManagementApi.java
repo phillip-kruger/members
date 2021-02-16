@@ -11,14 +11,11 @@ import java.util.Collection;
 import java.util.HashSet;
 import technology.overcast.Tenant;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import javax.inject.Inject;
-import javax.validation.ConstraintViolation;
-import javax.validation.ConstraintViolationException;
-import javax.validation.Validation;
-import javax.validation.Validator;
-import javax.validation.ValidatorFactory;
+import javax.validation.Valid;
 import javax.validation.constraints.Email;
 import javax.ws.rs.core.Response;
 import org.eclipse.microprofile.graphql.GraphQLApi;
@@ -39,8 +36,6 @@ import org.keycloak.representations.idm.UserRepresentation;
 @GraphQLApi
 public class MemberManagementApi {
 
-    private ValidatorFactory validatorFactory = Validation.buildDefaultValidatorFactory();
-    
     @Inject
     KeycloakClient keycloakClient;
     
@@ -65,12 +60,9 @@ public class MemberManagementApi {
     
     @Query
     public Member getMember(String id) {
-        
         Keycloak keycloak = keycloakClient.getKeycloak();
-        
         RealmResource clubRealm = keycloak.realm(tenant.getTenant());
         UsersResource usersResource = clubRealm.users();
-        
         UserResource userResource = usersResource.get(id);
         UserRepresentation user = userResource.toRepresentation();
         return toMember(user);
@@ -115,8 +107,20 @@ public class MemberManagementApi {
         return toMembers(groupResource.members());
     }
     
+    public String getDescription(@Source MembershipType membershipType){
+        Keycloak keycloak = keycloakClient.getKeycloak();
+        RealmResource clubRealm = keycloak.realm(tenant.getTenant());
+        GroupsResource groupsResource = clubRealm.groups();
+        GroupResource groupResource = groupsResource.group(membershipType.getId());
+        Map<String, List<String>> attributes = groupResource.toRepresentation().getAttributes();
+        if(attributes==null || attributes.isEmpty() || !attributes.containsKey(ATTRIBUTE_DESCRIPTION)){
+            return null;
+        }
+        return attributes.get(ATTRIBUTE_DESCRIPTION).get(0);
+    }
+    
     @Mutation
-    public Member createMember(Member member) throws MemberExistAlreadyException{
+    public Member createMember(@Valid Member member) throws MemberExistAlreadyException{
         if(member.getId()!=null && !member.getId().isEmpty()){
             throw new RuntimeException("Can not create a member that has an id [" + member.getId() + "]");
         }
@@ -141,15 +145,13 @@ public class MemberManagementApi {
         
         // TODO: Assisgn client (see https://gist.github.com/thomasdarimont/c4e739c5a319cf78a4cff3b87173a84b)
         
-        // Generate random password
+        // Generate and set random password
         CredentialRepresentation passwordCred = new CredentialRepresentation();
         passwordCred.setTemporary(true);
         passwordCred.setType(CredentialRepresentation.PASSWORD);
-        String radomPassword = PasswordGenerator.generate();
-        System.err.println(">>>>>> radomPassword = " + radomPassword);
-        passwordCred.setValue(radomPassword);
-        // Set password credential
+        passwordCred.setValue(PasswordGenerator.generate());
         userResource.resetPassword(passwordCred);
+        
         // TODO: Send email.
         
         UserRepresentation user = userResource.toRepresentation();
@@ -161,8 +163,24 @@ public class MemberManagementApi {
     }
     
     @Mutation
-    public String email(@Email String email){
-        return email;
+    public Member disableMember(String id){
+        return setEnabled(id,Boolean.FALSE);
+    }
+    
+    @Mutation
+    public Member enableMember(String id){
+        return setEnabled(id,Boolean.TRUE);
+    }
+    
+    private Member setEnabled(String id, Boolean enabled){
+        Keycloak keycloak = keycloakClient.getKeycloak();
+        RealmResource clubRealm = keycloak.realm(tenant.getTenant());
+        UserResource userResource = clubRealm.users().get(id);
+        UserRepresentation user = userResource.toRepresentation();
+        user.setEnabled(enabled);
+        userResource.update(user);
+
+        return toMember(user);
     }
     
     private List<Member> toMembers(Collection<UserRepresentation> usersRepresentations){
@@ -209,6 +227,8 @@ public class MemberManagementApi {
             member.setBirthdate(LocalDate.parse(birthdateString, DATEFORMATTER));
         }
 
+        member.setEnabled(user.isEnabled());
+        
         member.setCreatedAt(LocalDateTime.ofInstant(Instant.ofEpochMilli(user.getCreatedTimestamp()), ZoneId.systemDefault()));
         return member;
     }
@@ -223,7 +243,6 @@ public class MemberManagementApi {
     
     private MembershipType toMembershipType(GroupRepresentation groupRepresentation){
         return new MembershipType(groupRepresentation.getId(), groupRepresentation.getName());
-        
     }
     
     private void validateMember(Member member) throws MemberExistAlreadyException{
@@ -238,17 +257,15 @@ public class MemberManagementApi {
         if(membersWithEmail!=null && !membersWithEmail.isEmpty()){
             throw new MemberExistAlreadyException("Member with email [" + member.getEmail() + "] exists already");
         }
-        // Bean validation
-        Validator validator = validatorFactory.getValidator();
-        Set<ConstraintViolation<Member>> violations = validator.validate(member);
-        if(violations!=null && !violations.isEmpty()){
-            throw new ConstraintViolationException(violations);
-        }
     }
     
     private static DateTimeFormatter DATEFORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
     
+    // Member attributes
     private static final String ATTRIBUTE_GENDER = "gender";
     private static final String ATTRIBUTE_BIRTHDATE = "birthdate";
+    
+    // Type attributes
+    private static final String ATTRIBUTE_DESCRIPTION = "description";
     
 }
