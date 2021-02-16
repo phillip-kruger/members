@@ -33,6 +33,33 @@ mutation NewMember{
 }
 ```
 
+#### Update Member
+
+```
+mutation UpdateMember{
+  updateMember(member:
+    {
+      id: "ebcc362e-487e-4273-b504-4500e4f51421"
+      username: "koch.dejager"
+      name: "Koch"
+      surname: "de Jager"
+      email: "koch@gmail.com"
+      birthdate: "1974-03-05"
+      gender: male
+    }
+  ){
+    id
+    username
+    name
+    surname
+    email
+    birthdate
+    gender
+    createdAt    
+  }
+}
+```
+
 #### Enable/Disable Member
 
 ```

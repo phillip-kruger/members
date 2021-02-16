@@ -14,6 +14,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.validation.Valid;
 import javax.ws.rs.core.Response;
@@ -85,18 +89,19 @@ public class MemberManagementApi {
         UsersResource usersResource = clubRealm.users();
         
         Set<UserRepresentation> searchResults = new HashSet<>();
+         
         if(username.isPresent()){
             searchResults.addAll(usersResource.search(username.get()));
         }
-        if(email.isPresent()){
-            searchResults.addAll(usersResource.search(email.get()));
+        if(email.isPresent()){    
+            searchResults.addAll(usersResource.search(email.get(),0,1));
         }
         
         if(searchResults.isEmpty()){
             return null;
         }
         
-        return toMembers(searchResults);
+        return toMembers(searchResults.stream().filter(distinctByKey(UserRepresentation::getId)).collect(Collectors.toList()));
     }
     
     public List<MembershipType> getMembershipTypes(@Source Member member){
@@ -128,7 +133,7 @@ public class MemberManagementApi {
     }
     
     @Mutation
-    public Member createMember(@Valid Member member) throws MemberExistAlreadyException{
+    public Member createMember(@Valid Member member) throws MemberExistAlreadyException {
         if(member.getId()!=null && !member.getId().isEmpty()){
             throw new RuntimeException("Can not create a member that has an id [" + member.getId() + "]");
         }
@@ -166,8 +171,41 @@ public class MemberManagementApi {
         user.setEnabled(Boolean.TRUE);
         user.setEmailVerified(Boolean.TRUE); // TODO: first send email, maybe as part of password ?
         userResource.update(user);
-        return toMember(user);
+        return toMember(user);   
+    }
+    
+    @Mutation
+    public Member updateMember(@Valid Member member) throws MemberExistAlreadyException {
+        if(member.getId()==null || member.getId().isEmpty()){
+            throw new RuntimeException("Can not update a member that has no id");
+        }
         
+        validateMember(member);
+        
+        Keycloak keycloak = keycloakClient.getKeycloak();
+        
+        RealmResource clubRealm = keycloak.realm(tenant.getTenant());
+        UsersResource usersResource = clubRealm.users();
+        
+        UserResource current = usersResource.get(member.getId());
+        
+        UserRepresentation user = current.toRepresentation();
+        
+        boolean shouldValidateEmail = true;
+        String oldEmail = user.getEmail();
+        if(oldEmail.equalsIgnoreCase(member.getEmail())){
+            shouldValidateEmail = false;
+        }
+        
+        user = updateUserRepresentation(member, user);
+
+        if(shouldValidateEmail){
+            // TODO: if new email do validation
+            user.setEmailVerified(Boolean.TRUE); 
+        }
+        
+        current.update(user);
+        return toMember(user);   
     }
     
     @Mutation
@@ -200,6 +238,13 @@ public class MemberManagementApi {
         return toMember(user);
     }
     
+    // TODO: Reset password
+    
+    private static <T> Predicate<T> distinctByKey(Function<? super T, ?> keyExtractor) {
+        Set<Object> seen = ConcurrentHashMap.newKeySet();
+        return t -> seen.add(keyExtractor.apply(t));
+    }
+    
     private Member setEnabled(String memberId, Boolean enabled){
         Keycloak keycloak = keycloakClient.getKeycloak();
         RealmResource clubRealm = keycloak.realm(tenant.getTenant());
@@ -221,6 +266,10 @@ public class MemberManagementApi {
     
     private UserRepresentation toUserRepresentation(Member member){
         UserRepresentation user = new UserRepresentation();
+        return updateUserRepresentation(member, user);
+    }
+    
+    private UserRepresentation updateUserRepresentation(Member member, UserRepresentation user){
         user.setUsername(member.getUsername());
         user.setEmail(member.getEmail());
         user.setFirstName(member.getName());
@@ -278,12 +327,35 @@ public class MemberManagementApi {
         // Validate Username
         List<Member> membersWithUsername = searchMembers(Optional.of(member.getUsername()), Optional.empty());
         if(membersWithUsername!=null && !membersWithUsername.isEmpty()){
-            throw new MemberExistAlreadyException("Member with username [" + member.getUsername() + "] exists already");
+            // New user
+            if(member.getId()==null || member.getId().isEmpty()){
+                throw new MemberExistAlreadyException("Member with username [" + member.getUsername() + "] exists already");
+            }else if(membersWithUsername.size()>1){
+                throw new RuntimeException("Found multiple members with the same username [" + member.getUsername() + "]");            
+            }else {
+                // Existing user
+                Member me = membersWithUsername.get(0);
+                if(!me.getId().equals(member.getId())){
+                    throw new MemberExistAlreadyException("Member with username [" + member.getUsername() + "] exists already");
+                }
+            }
         }
+        
         // Validate email
-        List<Member> membersWithEmail = searchMembers(Optional.empty(),Optional.of(member.getEmail()));
+        List<Member> membersWithEmail = searchMembers(Optional.empty(),Optional.of(member.getEmail()));        
         if(membersWithEmail!=null && !membersWithEmail.isEmpty()){
-            throw new MemberExistAlreadyException("Member with email [" + member.getEmail() + "] exists already");
+            // New user
+            if(member.getId()==null || member.getId().isEmpty()){
+                throw new MemberExistAlreadyException("Member with email [" + member.getEmail() + "] exists already");
+            }else if(membersWithEmail.size()>1){
+                throw new RuntimeException("Found multiple members with the same email address [" + member.getEmail() + "]");            
+            }else {
+                // Existing user
+                Member me = membersWithEmail.get(0);
+                if(!me.getId().equals(member.getId())){
+                    throw new MemberExistAlreadyException("Member with email [" + member.getEmail() + "] exists already");
+                }
+            }
         }
     }
     
