@@ -110,7 +110,7 @@ mutation removeMembershipType {
 }
 ```
 
-# TOD0
+# TODO
 
 - Get built in email to work so that we can use email verified
 - And set password
