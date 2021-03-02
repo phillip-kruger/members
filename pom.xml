@@ -47,6 +47,13 @@
             <groupId>io.quarkus</groupId>
             <artifactId>quarkus-keycloak-admin-client</artifactId>
         </dependency>
+        <!-- To view the log-->
+        <dependency>
+            <groupId>io.quarkiverse.loggingmanager</groupId>
+            <artifactId>quarkus-logging-manager</artifactId>
+            <version>1.1.0</version>
+            <scope>runtime</scope>
+        </dependency>
         <dependency>
             <groupId>io.quarkus</groupId>
             <artifactId>quarkus-arc</artifactId>
