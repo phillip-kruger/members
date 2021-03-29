@@ -12,7 +12,7 @@ import org.keycloak.admin.client.KeycloakBuilder;
 @ApplicationScoped
 public class KeycloakClient {
 
-    @ConfigProperty(name = "ovecast.keycloak.serverUrl", defaultValue = "http://localhost:8080/auth")
+    @ConfigProperty(name = "ovecast.keycloak.serverUrl", defaultValue = "http://localhost:8081/auth")
     String serverUrl;
     
     @ConfigProperty(name = "ovecast.keycloak.masterRealm", defaultValue = "master")
