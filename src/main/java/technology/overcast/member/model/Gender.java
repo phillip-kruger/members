@@ -1,4 +1,4 @@
-package technology.overcast.members;
+package technology.overcast.member.model;
 
 /**
  * Represents gender

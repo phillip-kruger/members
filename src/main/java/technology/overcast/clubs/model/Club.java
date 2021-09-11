@@ -1,4 +1,4 @@
-package technology.overcast.clubs;
+package technology.overcast.clubs.model;
 
 /**
  * Club POJO
@@ -7,6 +7,7 @@ package technology.overcast.clubs;
  */
 public class Club {
 
+    public String id;
     public String name;
     public String displayName;
 
@@ -14,6 +15,12 @@ public class Club {
     }
 
     public Club(String name, String displayName) {
+        this.name = name;
+        this.displayName = displayName;
+    }
+    
+    public Club(String id, String name, String displayName) {
+        this.id = id;
         this.name = name;
         this.displayName = displayName;
     }    

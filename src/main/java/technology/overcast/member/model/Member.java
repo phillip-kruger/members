@@ -1,4 +1,4 @@
-package technology.overcast.members;
+package technology.overcast.member.model;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
