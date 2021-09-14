@@ -1,4 +1,11 @@
-Club name, Club display name
-quarkus, Quarkus Racket Club
-kentron, Kentron Squash Club
-uitsig, Uitsig Squash Club
+Club name,  Username,           Name,       Surname,        Email,                          Gender,  Birthdate
+kentron,    reinier.dutoit,     Reinier,    Du Toit,        reinierdutoit@gmail.com,        male,    1979-02-18
+kentron,    derik.deklerk,      Derik,      De Klerk,       deklerk.derik@gmail.com,        male,    1978-10-02
+kentron,    willem.ras,         Willem,     Ras,            willemras@gmail.com,            male,    1978-03-10
+kentron,    corne.duvenage,     Corne,      Duvenage,       cornduvenage@gmail.com,         male,    1999-05-18
+kentron,    jeanine.vaneyssen,  Jeanine,    Van Eyssen,     jvaneyssen9@gmail.com,          female,  1978-04-09
+kentron,    eben.smit,          Eben,       Smit,           ebensmit13@gmail.com,           male,    1988-04-20
+kentron,    leon.duvenage,      Leon,       Duvenage,       leon.d@midrand-estates.co.za,   male,    1965-01-05
+kentron,    alfred.basson,      Alfred,     Basson,         abasson@fnb.co.za,              male,    1970-06-22
+kentron,    phillip.kruger,     Phillip,    Kruger,         phillip.kruger@gmail.com,       male,    1978-07-03
+kentron,    koch.dejager,       Koch,       de Jager,       kochdejager@gmail.com,          male,    1973-12-23

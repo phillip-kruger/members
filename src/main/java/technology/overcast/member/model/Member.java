@@ -27,7 +27,7 @@ public class Member {
     private Gender gender;
     @NotNull @Past(message = "Not a valid birth date") 
     private LocalDate birthdate;
-
+    
     private boolean enabled = true; // default
     
     public String getId() {

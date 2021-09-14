@@ -16,41 +16,49 @@ public class MemberApi {
     @Inject
     MemberService memberService;
     
+    @Inject
+    RequestContext requestContext;
+    
     @Query
     public List<MembershipType> getMembershipTypes(String club) {
+        requestContext.setClub(club);
         return memberService.getMembershipTypes(club);
     }
     
     @Query
     public MembershipType getMembershipType(String club, String id) {
+        requestContext.setClub(club);
         return memberService.getMembershipType(club, id);
     }
     
     @Query
     public List<Member> getMembers(String club) {
+        requestContext.setClub(club);
         return memberService.getMembers(club);
     }
     
     @Query
     public Member getMember(String club, String id) {
+        requestContext.setClub(club);
         return memberService.getMember(club, id);
     }
     
     @Query
     public List<Member> searchMembers(String club, Optional<String> username,Optional<String> email) {
+        requestContext.setClub(club);
         return memberService.searchMembers(club, username, email);
     }
     
-    public List<MembershipType> getMembershipTypes(@Source Member member){
-        return memberService.getMembershipTypes(member);
+    public List<List<MembershipType>> getMembershipTypes(@Source List<Member> members){
+        return memberService.getMembershipTypes(requestContext.getClub(), members);
     }
     
     public List<Member> getMembers(@Source MembershipType membershipType){
-        return memberService.getMembers(membershipType);
+        return memberService.getMembers(requestContext.getClub(), membershipType);
     }
     
     public String getDescription(@Source MembershipType membershipType){
-        return memberService.getDescription(membershipType);
+        return memberService.getMembershipTypeDescription(requestContext.getClub(), membershipType.getId());
     }
     
     @Mutation
@@ -74,13 +82,13 @@ public class MemberApi {
     }
     
     @Mutation
-    public Member addMembershipType(String club, String memberId, String groupId){
-        return memberService.addMembershipType(club, memberId, groupId);
+    public Member joinMembership(String club, String memberId, String groupId){
+        return memberService.memberJoinMembership(club, memberId, groupId);
     }
     
     @Mutation
-    public Member removeMembershipType(String club, String memberId, String groupId){
-        return memberService.removeMembershipType(club, memberId, groupId);
+    public Member leaveMembership(String club, String memberId, String groupId){
+        return memberService.memberLeaveMembership(club, memberId, groupId);
     }
     
 }

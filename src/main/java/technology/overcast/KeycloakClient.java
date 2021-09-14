@@ -28,22 +28,22 @@ public class KeycloakClient {
     @ConfigProperty(name = "ovecast.keycloak.admin.password", defaultValue = "admin")
     String password;
     
-    private Keycloak keycloak;
+    private String serverUrl;
     
     @PostConstruct
     public void init(){
-        this.keycloak = KeycloakBuilder.builder()
-                        .serverUrl(getServerUrl())
+        this.serverUrl = getServerUrl();
+    }
+    
+    public Keycloak getKeycloak(){
+        return KeycloakBuilder.builder()
+                        .serverUrl(serverUrl)
                         .realm(masterRealm)
                         .clientId(clientId)
                         .username(username)
                         .password(password)
                         .grantType(GRANT_TYPE)
                         .build();
-    }
-    
-    public Keycloak getKeycloak(){
-        return keycloak;
     }
     
     private String getServerUrl(){

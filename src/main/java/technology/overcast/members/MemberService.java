@@ -1,5 +1,7 @@
 package technology.overcast.members;
 
+import io.quarkus.cache.CacheInvalidateAll;
+import io.quarkus.cache.CacheResult;
 import technology.overcast.member.model.Gender;
 import technology.overcast.member.model.Member;
 import java.time.Instant;
@@ -19,7 +21,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
-import javax.enterprise.context.RequestScoped;
+import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.validation.Valid;
 import javax.ws.rs.core.Response;
@@ -34,16 +36,14 @@ import org.keycloak.representations.idm.CredentialRepresentation;
 import org.keycloak.representations.idm.GroupRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
 
-@RequestScoped
+@ApplicationScoped
 public class MemberService {
 
     @Inject
     KeycloakClient keycloakClient;
     
-    private String club;
-    
+    @CacheResult(cacheName = "membership-types-cache")
     public List<MembershipType> getMembershipTypes(String club) {
-        this.club = club;
         try(Keycloak keycloak = keycloakClient.getKeycloak()){
             RealmResource clubRealm = keycloak.realm(club);
             GroupsResource groupsResource = clubRealm.groups();
@@ -51,8 +51,8 @@ public class MemberService {
         }
     }
     
+    @CacheResult(cacheName = "membership-type-cache")
     public MembershipType getMembershipType(String club, String id) {
-        this.club = club;
         try(Keycloak keycloak = keycloakClient.getKeycloak()){
             RealmResource clubRealm = keycloak.realm(club);
             GroupsResource groupsResource = clubRealm.groups();
@@ -61,8 +61,29 @@ public class MemberService {
         }
     }
     
+    
+    public Member memberJoinMembership(String club, String memberId, String membershipTypeId){
+        try(Keycloak keycloak = keycloakClient.getKeycloak()){
+            RealmResource clubRealm = keycloak.realm(club);
+            UserResource userResource = clubRealm.users().get(memberId);
+            UserRepresentation user = userResource.toRepresentation();
+            userResource.joinGroup(membershipTypeId);
+            return toMember(user);
+        }
+    }
+    
+    public Member memberLeaveMembership(String club, String memberId, String membershipTypeId){
+        try(Keycloak keycloak = keycloakClient.getKeycloak()){
+            RealmResource clubRealm = keycloak.realm(club);
+            UserResource userResource = clubRealm.users().get(memberId);
+            UserRepresentation user = userResource.toRepresentation();
+            userResource.leaveGroup(membershipTypeId);
+            return toMember(user);
+        }
+    }
+    
+    @CacheResult(cacheName = "members-cache")
     public List<Member> getMembers(String club) {
-        this.club = club;
         try(Keycloak keycloak = keycloakClient.getKeycloak()){
             RealmResource clubRealm = keycloak.realm(club);
             UsersResource usersResource = clubRealm.users();
@@ -70,8 +91,8 @@ public class MemberService {
         }
     }
     
+    @CacheResult(cacheName = "member-cache")
     public Member getMember(String club, String id) {
-        this.club = club;
         try(Keycloak keycloak = keycloakClient.getKeycloak()){
             RealmResource clubRealm = keycloak.realm(club);
             UsersResource usersResource = clubRealm.users();
@@ -82,7 +103,6 @@ public class MemberService {
     }
     
     public List<Member> searchMembers(String club, Optional<String> username,Optional<String> email) {
-        this.club = club;
         try(Keycloak keycloak = keycloakClient.getKeycloak()){
         
             RealmResource clubRealm = keycloak.realm(club);
@@ -105,29 +125,35 @@ public class MemberService {
         }
     }
     
-    public List<MembershipType> getMembershipTypes(Member member){
+    public List<List<MembershipType>> getMembershipTypes(String club, List<Member> members){
+        List<List<MembershipType>> bulk = new ArrayList<>();
         try(Keycloak keycloak = keycloakClient.getKeycloak()){
-            RealmResource clubRealm = keycloak.realm(this.club);
+            RealmResource clubRealm = keycloak.realm(club);
             UsersResource usersResource = clubRealm.users();
-            UserResource userResource = usersResource.get(member.getId());
-            return toMembershipTypes(userResource.groups());
+            for(Member member:members){
+                UserResource userResource = usersResource.get(member.getId());
+                bulk.add(toMembershipTypes(userResource.groups()));
+            }
+            return bulk;
         }
     }
     
-    public List<Member> getMembers(MembershipType membershipType){
+    
+    
+    public List<Member> getMembers(String club, MembershipType membershipType){
         try(Keycloak keycloak = keycloakClient.getKeycloak()){
-            RealmResource clubRealm = keycloak.realm(this.club);
+            RealmResource clubRealm = keycloak.realm(club);
             GroupsResource groupsResource = clubRealm.groups();
             GroupResource groupResource = groupsResource.group(membershipType.getId());
             return toMembers(groupResource.members());
         }
     }
     
-    public String getDescription(MembershipType membershipType){
+    public String getMembershipTypeDescription(String club, String membershipTypeId){
         try(Keycloak keycloak = keycloakClient.getKeycloak()){
-            RealmResource clubRealm = keycloak.realm(this.club);
+            RealmResource clubRealm = keycloak.realm(club);
             GroupsResource groupsResource = clubRealm.groups();
-            GroupResource groupResource = groupsResource.group(membershipType.getId());
+            GroupResource groupResource = groupsResource.group(membershipTypeId);
             Map<String, List<String>> attributes = groupResource.toRepresentation().getAttributes();
             if(attributes==null || attributes.isEmpty() || !attributes.containsKey(ATTRIBUTE_DESCRIPTION)){
                 return null;
@@ -136,8 +162,8 @@ public class MemberService {
         }
     }
     
+    @CacheInvalidateAll(cacheName = "members-cache")
     public Member createMember(String club, @Valid Member member) throws MemberExistAlreadyException {
-        this.club = club;
         if(member.getId()!=null && !member.getId().isEmpty()){
             throw new RuntimeException("Can not create a member that has an id [" + member.getId() + "]");
         }
@@ -179,11 +205,12 @@ public class MemberService {
         }
     }
     
+    @CacheInvalidateAll(cacheName = "members-cache")
+    @CacheInvalidateAll(cacheName = "member-cache")
     public Member updateMember(String club, @Valid Member member) throws MemberExistAlreadyException {
         if(member.getId()==null || member.getId().isEmpty()){
             throw new RuntimeException("Can not update a member that has no id");
         }
-        this.club = club;
         
         validateMember(club, member);
         
@@ -214,30 +241,7 @@ public class MemberService {
         }
     }
     
-    public Member addMembershipType(String club, String memberId, String groupId){
-        this.club = club;
-        try(Keycloak keycloak = keycloakClient.getKeycloak()){
-            RealmResource clubRealm = keycloak.realm(club);
-            UserResource userResource = clubRealm.users().get(memberId);
-            UserRepresentation user = userResource.toRepresentation();
-            userResource.joinGroup(groupId);
-            return toMember(user);
-        }
-    }
-    
-    public Member removeMembershipType(String club, String memberId, String groupId){
-        this.club = club;
-        try(Keycloak keycloak = keycloakClient.getKeycloak()){
-            RealmResource clubRealm = keycloak.realm(club);
-            UserResource userResource = clubRealm.users().get(memberId);
-            UserRepresentation user = userResource.toRepresentation();
-            userResource.leaveGroup(groupId);
-            return toMember(user);
-        }
-    }
-    
     public Member enabled(String club, String memberId, Boolean enabled){
-        this.club = club;
         try(Keycloak keycloak = keycloakClient.getKeycloak()){
             RealmResource clubRealm = keycloak.realm(club);
             UserResource userResource = clubRealm.users().get(memberId);
@@ -259,7 +263,10 @@ public class MemberService {
     private List<Member> toMembers(Collection<UserRepresentation> usersRepresentations){
         List<Member> members = new ArrayList<>();
         for(UserRepresentation user:usersRepresentations){
-            members.add(toMember(user));
+            Member m = toMember(user);
+            if(m!=null){
+                members.add(m);
+            }
         }
         return members;
     }
@@ -285,29 +292,42 @@ public class MemberService {
     }
     
     private Member toMember(UserRepresentation user){
-        Member member = new Member();
-        member.setId(user.getId());
-        member.setUsername(user.getUsername());
-        member.setName(user.getFirstName());
-        member.setSurname(user.getLastName());
-        member.setEmail(user.getEmail());
+        if(isValid(user)){
+            Member member = new Member();
+            member.setId(user.getId());
+            member.setUsername(user.getUsername());
+            member.setName(user.getFirstName());
+            member.setSurname(user.getLastName());
+            member.setEmail(user.getEmail());
+            
+            String genderString = user.firstAttribute(ATTRIBUTE_GENDER);
+            if(genderString!=null && !genderString.isEmpty()){
+                member.setGender(Gender.valueOf(genderString));
+            }else{
+                member.setGender(Gender.unknown);
+            }
 
-        String genderString = user.firstAttribute(ATTRIBUTE_GENDER);
-        if(genderString!=null && !genderString.isEmpty()){
-            member.setGender(Gender.valueOf(genderString));
-        }else{
-            member.setGender(Gender.unknown);
+            String birthdateString = user.firstAttribute(ATTRIBUTE_BIRTHDATE);
+            if(birthdateString!=null && !birthdateString.isEmpty()){
+                member.setBirthdate(LocalDate.parse(birthdateString, DATEFORMATTER));
+            }
+
+            member.setEnabled(user.isEnabled());
+
+            if(user.getCreatedTimestamp()!=null){
+                member.setCreatedAt(LocalDateTime.ofInstant(Instant.ofEpochMilli(user.getCreatedTimestamp()), ZoneId.systemDefault()));
+            }
+            
+            return member;
         }
-
-        String birthdateString = user.firstAttribute(ATTRIBUTE_BIRTHDATE);
-        if(birthdateString!=null && !birthdateString.isEmpty()){
-            member.setBirthdate(LocalDate.parse(birthdateString, DATEFORMATTER));
-        }
-
-        member.setEnabled(user.isEnabled());
-        
-        member.setCreatedAt(LocalDateTime.ofInstant(Instant.ofEpochMilli(user.getCreatedTimestamp()), ZoneId.systemDefault()));
-        return member;
+        return null;
+    }
+    
+    private boolean isValid(UserRepresentation user){
+        return user.getUsername()!=null && 
+            user.getFirstName()!=null &&
+            user.getLastName()!=null && 
+            user.getEmail()!=null;
     }
     
     private List<MembershipType> toMembershipTypes(List<GroupRepresentation> groupsResources){

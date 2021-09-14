@@ -74,11 +74,13 @@ public class ClubService {
     
     private Club toClub(RealmRepresentation realmRepresentation){
         String id = realmRepresentation.getId();
-        if(!id.equalsIgnoreCase(MASTER)){
+        String name = realmRepresentation.getRealm();
+        if(!id.equalsIgnoreCase(MASTER) && !name.equalsIgnoreCase(QUARKUS)){
             return new Club(realmRepresentation.getId(),realmRepresentation.getRealm(), getDisplayName(realmRepresentation));
         }
         return null;
     }
     
     private static final String MASTER = "master";
+    private static final String QUARKUS = "quarkus";
 }
