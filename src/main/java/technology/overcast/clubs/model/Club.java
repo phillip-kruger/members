@@ -7,9 +7,9 @@ package technology.overcast.clubs.model;
  */
 public class Club {
 
-    public String id;
-    public String name;
-    public String displayName;
+    private String id;
+    private String name;
+    private String displayName;
 
     public Club() {
     }
@@ -23,5 +23,29 @@ public class Club {
         this.id = id;
         this.name = name;
         this.displayName = displayName;
-    }    
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getDisplayName() {
+        return displayName;
+    }
+
+    public void setDisplayName(String displayName) {
+        this.displayName = displayName;
+    }
 }

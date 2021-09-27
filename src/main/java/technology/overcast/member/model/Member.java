@@ -103,9 +103,4 @@ public class Member {
     public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
     }
-    
-    @Override
-    public String toString() {
-        return "Member{" + "id=" + id + ", username=" + username + ", name=" + name + ", surname=" + surname + ", email=" + email + ", createdAt=" + createdAt + ", gender=" + gender + ", birthdate=" + birthdate + '}';
-    }
 }

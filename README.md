@@ -6,6 +6,31 @@ This project allows member management.
 
 9090
 
+### Queries
+
+Get all clubs
+
+```
+{
+    clubs{
+  	name
+    }
+}
+```
+
+Get all members of a club:
+
+```
+{
+    members(club:"quarkus"){
+        name
+        surname
+        email
+    }
+}
+```
+
+
 ### Mutations
 
 #### Create new Member

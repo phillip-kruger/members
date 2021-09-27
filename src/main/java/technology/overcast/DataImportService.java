@@ -1,11 +1,13 @@
 package technology.overcast;
 
+import io.quarkus.logging.Log;
 import io.quarkus.runtime.StartupEvent;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.time.LocalDate;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.logging.Level;
@@ -20,6 +22,7 @@ import technology.overcast.member.model.Gender;
 import technology.overcast.member.model.Member;
 import technology.overcast.members.MemberExistAlreadyException;
 import technology.overcast.members.MemberService;
+import technology.overcast.members.MembershipType;
 
 /**
  * Application Lifecycle
@@ -45,6 +48,8 @@ public class DataImportService {
 
     public void importData(){
         // Load data from file
+        Log.info("Importing data...");
+        
         try (InputStream inputStream = getClass().getResourceAsStream("/init/clubs.csv");
             BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
             reader.readLine(); // First line is the headings
@@ -57,6 +62,9 @@ public class DataImportService {
                 String clubDisplayName = cols[COL_CLUB_DISPLAY_NAME];
                 importClub(clubName, clubDisplayName);
                 
+                // MembershipTypes
+                String membershipTypes = cols[COL_MEMBERSHIP_TYPES];
+                importMembershipType(clubName, Arrays.asList(membershipTypes.split(SPACE)));
             }   
         } catch (IOException ex) {
             Logger.getLogger(DataImportService.class.getName()).log(Level.SEVERE, null, ex);
@@ -78,7 +86,13 @@ public class DataImportService {
                 String memberGender = cols[COL_MEMBER_GENDER];
                 String memberBirthDate = cols[COL_MEMBER_BIRTHDATE];
                 try {
-                    importMember(clubName, memberUserName, memberName, memberSurname, memberEmail, memberGender, memberBirthDate);
+                    Member m = importMember(clubName, memberUserName, memberName, memberSurname, memberEmail, memberGender, memberBirthDate);
+                    // Add to groups
+                    String memberOf = cols[COL_MEMBER_OF];
+                    importMemberOf(clubName, m.getId(), Arrays.asList(memberOf.split(SPACE)));
+                    
+                    Log.info("..... member [" + m.getId() + "," + m.getUsername() + "," + m.getName() + " " + m.getSurname() +"]");
+                    
                 } catch (MemberExistAlreadyException ex) {
                     Logger.getLogger(DataImportService.class.getName()).log(Level.SEVERE, null, ex);
                 }
@@ -93,15 +107,24 @@ public class DataImportService {
         if(club==null){
             // create club
             club = new Club(clubName.trim(), clubDisplayName.trim());
-            clubService.setClub(club);
-        }else if (clubDisplayName!=club.displayName){
+            club = clubService.setClub(club);
+            Log.info("... club [" + club.getId() + "," + club.getName() + "," + club.getDisplayName() + "]");
+        }else if (clubDisplayName!=club.getDisplayName()){
             // update club
-            club.displayName = clubDisplayName.trim();
-            clubService.setClub(club);
+            club.setDisplayName(clubDisplayName.trim());
+            club = clubService.setClub(club);
+            Log.info("... club [" + club.getId() + "," + club.getName() + "," + club.getDisplayName() + "]");
         }
     }
 
-    private void importMember(String club, String memberUserName, String memberName, String memberSurname, String memberEmail, String memberGender, String memberBirthDate) throws MemberExistAlreadyException {
+    private void importMembershipType(String club, List<String> typeNames){
+        List<MembershipType> membershipTypes = memberService.addMembershipTypes(club, typeNames);
+        for(MembershipType membershipType : membershipTypes){
+            Log.info(".... membershipType [" + membershipType.getId() + "," + membershipType.getName() + "]");
+        }
+    }
+    
+    private Member importMember(String club, String memberUserName, String memberName, String memberSurname, String memberEmail, String memberGender, String memberBirthDate) throws MemberExistAlreadyException {
         
         Member m = new Member();
         m.setUsername(memberUserName.trim());
@@ -115,25 +138,41 @@ public class DataImportService {
         
         if(members==null || members.isEmpty()){
             // create member
-            memberService.createMember(club, m);
+            return memberService.createMember(club, m);
         }else if(members.size()==1){
             // update member
             m.setId(members.get(0).getId());
-            memberService.updateMember(club, m);
+            return memberService.updateMember(club, m);
         }else{
             throw new RuntimeException("Found multiple users with the same username and/or email");
         }
         
     }
     
+    private void importMemberOf(String club, String id, List<String> memberships) {
+        
+//        List<MembershipType> membershipTypes = memberService.getMembershipTypes(club);
+//        List<String> ids = new ArrayList<>();
+//        for(MembershipType membershipType:membershipTypes){
+//            if(memberships.contains(membershipType.getName())){
+//                ids.add(membershipType.getId());
+//            }
+//        }
+        
+        memberService.memberJoinMemberships(club,id, memberships);
+    }
+    
+    private static final String SPACE = " ";
     private static final String COMMA = ",";
     private static final int COL_CLUB_NAME = 0;
     private static final int COL_CLUB_DISPLAY_NAME = 1;
+    private static final int COL_MEMBERSHIP_TYPES = 2;
     private static final int COL_MEMBER_USERNAME = 1;
     private static final int COL_MEMBER_NAME = 2;
     private static final int COL_MEMBER_SURNAME = 3;
     private static final int COL_MEMBER_EMAIL = 4;
     private static final int COL_MEMBER_GENDER = 5;
     private static final int COL_MEMBER_BIRTHDATE = 6;
-    
+    private static final int COL_MEMBER_OF = 7;
+
 }

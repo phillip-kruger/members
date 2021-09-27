@@ -48,17 +48,23 @@ public class ClubService {
     }
     
     public Club setClub(Club club){
+        
+        Club existing = getClub(club.getName());
+        if(existing!=null){
+            club.setId(existing.getId());
+        }
+        
         try(Keycloak keycloak = keycloakClient.getKeycloak()){
-            if(club.id!=null){
+            if(club.getId()!=null){
                 // Update
-                RealmRepresentation rr = keycloak.realms().realm(club.name).toRepresentation();
-                rr.setDisplayName(club.displayName);
-                keycloak.realms().realm(club.name).update(rr);
+                RealmRepresentation rr = keycloak.realms().realm(club.getName()).toRepresentation();
+                rr.setDisplayName(club.getDisplayName());
+                keycloak.realms().realm(club.getName()).update(rr);
             }else{
                 // Add
                 RealmRepresentation rr = new RealmRepresentation();
-                rr.setRealm(club.name);
-                rr.setDisplayName(club.displayName);
+                rr.setRealm(club.getName());
+                rr.setDisplayName(club.getDisplayName());
                 keycloak.realms().create(rr);
             }
             return club;
@@ -75,12 +81,11 @@ public class ClubService {
     private Club toClub(RealmRepresentation realmRepresentation){
         String id = realmRepresentation.getId();
         String name = realmRepresentation.getRealm();
-        if(!id.equalsIgnoreCase(MASTER) && !name.equalsIgnoreCase(QUARKUS)){
+        if(!id.equalsIgnoreCase(MASTER)){
             return new Club(realmRepresentation.getId(),realmRepresentation.getRealm(), getDisplayName(realmRepresentation));
         }
         return null;
     }
     
     private static final String MASTER = "master";
-    private static final String QUARKUS = "quarkus";
 }
