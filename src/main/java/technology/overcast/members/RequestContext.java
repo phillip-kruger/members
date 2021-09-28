@@ -13,5 +13,4 @@ public class RequestContext {
     public void setClub(String club) {
         this.club = club;
     }
-    
 }

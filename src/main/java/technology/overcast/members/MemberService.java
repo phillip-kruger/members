@@ -14,7 +14,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -53,6 +52,7 @@ public class MemberService {
     
     @CacheInvalidateAll(cacheName = "membership-types-cache")
     public List<MembershipType> addMembershipTypes(String club, List<String> names) {
+        club = club.toLowerCase();
         try(Keycloak keycloak = keycloakClient.getKeycloak()){
             RealmResource clubRealm = keycloak.realm(club);
             List<MembershipType> responses = new ArrayList<>();
@@ -82,11 +82,13 @@ public class MemberService {
     
     @CacheInvalidateAll(cacheName = "membership-types-cache")
     public MembershipType addMembershipType(String club, String name) {
+        club = club.toLowerCase();
         return addMembershipTypes(club, List.of(name)).get(0);
     }
     
     @CacheResult(cacheName = "membership-types-cache")
     public List<MembershipType> getMembershipTypes(String club) {
+        club = club.toLowerCase();
         try(Keycloak keycloak = keycloakClient.getKeycloak()){
             RealmResource clubRealm = keycloak.realm(club);
             RolesResource rolesResource = clubRealm.roles();
@@ -96,6 +98,7 @@ public class MemberService {
     
     @CacheResult(cacheName = "membership-type-cache")
     public MembershipType getMembershipType(String club, String id) {
+        club = club.toLowerCase();
         try(Keycloak keycloak = keycloakClient.getKeycloak()){
             RealmResource clubRealm = keycloak.realm(club);
             RolesResource rolesResource = clubRealm.roles();
@@ -106,10 +109,12 @@ public class MemberService {
     
     
     public Member memberJoinMembership(String club, String memberId, String membershipType){
+        club = club.toLowerCase();
         return memberJoinMemberships(club, memberId, List.of(membershipType));
     }
     
     public Member memberJoinMemberships(String club, String memberId, List<String> membershipTypes){
+        club = club.toLowerCase();
         try(Keycloak keycloak = keycloakClient.getKeycloak()){
             RealmResource clubRealm = keycloak.realm(club);
             UserResource userResource = clubRealm.users().get(memberId);
@@ -137,10 +142,12 @@ public class MemberService {
     }
     
     public Member memberLeaveMembership(String club, String memberId, String membershipType){
+        club = club.toLowerCase();
         return memberLeaveMemberships(club, memberId, List.of(membershipType));
     }
     
     public Member memberLeaveMemberships(String club, String memberId, List<String> membershipTypes){
+        club = club.toLowerCase();
         try(Keycloak keycloak = keycloakClient.getKeycloak()){
             RealmResource clubRealm = keycloak.realm(club);
             UserResource userResource = clubRealm.users().get(memberId);
@@ -169,6 +176,7 @@ public class MemberService {
     
     @CacheResult(cacheName = "members-cache")
     public List<Member> getMembers(String club) {
+        club = club.toLowerCase();
         try(Keycloak keycloak = keycloakClient.getKeycloak()){
             RealmResource clubRealm = keycloak.realm(club);
             UsersResource usersResource = clubRealm.users();
@@ -178,6 +186,7 @@ public class MemberService {
     
     @CacheResult(cacheName = "member-cache")
     public Member getMember(String club, String id) {
+        club = club.toLowerCase();
         try(Keycloak keycloak = keycloakClient.getKeycloak()){
             RealmResource clubRealm = keycloak.realm(club);
             UsersResource usersResource = clubRealm.users();
@@ -188,6 +197,7 @@ public class MemberService {
     }
     
     public List<Member> searchMembers(String club, Optional<String> username,Optional<String> email) {
+        club = club.toLowerCase();
         try(Keycloak keycloak = keycloakClient.getKeycloak()){
         
             RealmResource clubRealm = keycloak.realm(club);
@@ -211,6 +221,7 @@ public class MemberService {
     }
     
     public List<List<MembershipType>> getMembershipTypes(String club, List<Member> members){
+        club = club.toLowerCase();
         List<List<MembershipType>> bulk = new ArrayList<>();
         try(Keycloak keycloak = keycloakClient.getKeycloak()){
             RealmResource clubRealm = keycloak.realm(club);
@@ -223,7 +234,10 @@ public class MemberService {
         }
     }
     
+    
+    // TODO: Fix this
     public List<Member> getMembers(String club, MembershipType membershipType){
+        club = club.toLowerCase();
         try(Keycloak keycloak = keycloakClient.getKeycloak()){
             RealmResource clubRealm = keycloak.realm(club);
             GroupsResource groupsResource = clubRealm.groups();
@@ -232,21 +246,9 @@ public class MemberService {
         }
     }
     
-    public String getMembershipTypeDescription(String club, String membershipTypeId){
-        try(Keycloak keycloak = keycloakClient.getKeycloak()){
-            RealmResource clubRealm = keycloak.realm(club);
-            GroupsResource groupsResource = clubRealm.groups();
-            GroupResource groupResource = groupsResource.group(membershipTypeId);
-            Map<String, List<String>> attributes = groupResource.toRepresentation().getAttributes();
-            if(attributes==null || attributes.isEmpty() || !attributes.containsKey(ATTRIBUTE_DESCRIPTION)){
-                return null;
-            }
-            return attributes.get(ATTRIBUTE_DESCRIPTION).get(0);
-        }
-    }
-    
     @CacheInvalidateAll(cacheName = "members-cache")
     public Member createMember(String club, @Valid Member member) throws MemberExistAlreadyException {
+        club = club.toLowerCase();
         if(member.getId()!=null && !member.getId().isEmpty()){
             throw new RuntimeException("Can not create a member that has an id [" + member.getId() + "]");
         }
@@ -298,6 +300,7 @@ public class MemberService {
     @CacheInvalidateAll(cacheName = "members-cache")
     @CacheInvalidateAll(cacheName = "member-cache")
     public Member updateMember(String club, @Valid Member member) throws MemberExistAlreadyException {
+        club = club.toLowerCase();
         if(member.getId()==null || member.getId().isEmpty()){
             throw new RuntimeException("Can not update a member that has no id");
         }
@@ -332,6 +335,7 @@ public class MemberService {
     }
     
     public Member enabled(String club, String memberId, Boolean enabled){
+        club = club.toLowerCase();
         try(Keycloak keycloak = keycloakClient.getKeycloak()){
             RealmResource clubRealm = keycloak.realm(club);
             UserResource userResource = clubRealm.users().get(memberId);

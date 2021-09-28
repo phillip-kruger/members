@@ -1,6 +1,5 @@
 package technology.overcast;
 
-import io.quarkus.logging.Log;
 import io.quarkus.runtime.StartupEvent;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -22,7 +21,6 @@ import technology.overcast.member.model.Gender;
 import technology.overcast.member.model.Member;
 import technology.overcast.members.MemberExistAlreadyException;
 import technology.overcast.members.MemberService;
-import technology.overcast.members.MembershipType;
 
 /**
  * Application Lifecycle
@@ -48,8 +46,6 @@ public class DataImportService {
 
     public void importData(){
         // Load data from file
-        Log.info("Importing data...");
-        
         try (InputStream inputStream = getClass().getResourceAsStream("/init/clubs.csv");
             BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
             reader.readLine(); // First line is the headings
@@ -90,9 +86,6 @@ public class DataImportService {
                     // Add to groups
                     String memberOf = cols[COL_MEMBER_OF];
                     importMemberOf(clubName, m.getId(), Arrays.asList(memberOf.split(SPACE)));
-                    
-                    Log.info("..... member [" + m.getId() + "," + m.getUsername() + "," + m.getName() + " " + m.getSurname() +"]");
-                    
                 } catch (MemberExistAlreadyException ex) {
                     Logger.getLogger(DataImportService.class.getName()).log(Level.SEVERE, null, ex);
                 }
@@ -108,20 +101,15 @@ public class DataImportService {
             // create club
             club = new Club(clubName.trim(), clubDisplayName.trim());
             club = clubService.setClub(club);
-            Log.info("... club [" + club.getId() + "," + club.getName() + "," + club.getDisplayName() + "]");
         }else if (clubDisplayName!=club.getDisplayName()){
             // update club
             club.setDisplayName(clubDisplayName.trim());
             club = clubService.setClub(club);
-            Log.info("... club [" + club.getId() + "," + club.getName() + "," + club.getDisplayName() + "]");
         }
     }
 
     private void importMembershipType(String club, List<String> typeNames){
-        List<MembershipType> membershipTypes = memberService.addMembershipTypes(club, typeNames);
-        for(MembershipType membershipType : membershipTypes){
-            Log.info(".... membershipType [" + membershipType.getId() + "," + membershipType.getName() + "]");
-        }
+        memberService.addMembershipTypes(club, typeNames);
     }
     
     private Member importMember(String club, String memberUserName, String memberName, String memberSurname, String memberEmail, String memberGender, String memberBirthDate) throws MemberExistAlreadyException {
@@ -150,15 +138,6 @@ public class DataImportService {
     }
     
     private void importMemberOf(String club, String id, List<String> memberships) {
-        
-//        List<MembershipType> membershipTypes = memberService.getMembershipTypes(club);
-//        List<String> ids = new ArrayList<>();
-//        for(MembershipType membershipType:membershipTypes){
-//            if(memberships.contains(membershipType.getName())){
-//                ids.add(membershipType.getId());
-//            }
-//        }
-        
         memberService.memberJoinMemberships(club,id, memberships);
     }
     

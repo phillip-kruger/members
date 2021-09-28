@@ -2,6 +2,7 @@ package technology.overcast.clubs;
 
 import technology.overcast.clubs.model.Club;
 import java.util.List;
+import javax.annotation.security.RolesAllowed;
 import javax.inject.Inject;
 import org.eclipse.microprofile.graphql.GraphQLApi;
 import org.eclipse.microprofile.graphql.Mutation;
@@ -24,6 +25,7 @@ public class ClubApi {
     }
     
     @Mutation
+    @RolesAllowed("admin")
     public Club setClub(Club club){
         return clubService.setClub(club);
     }
