@@ -1,5 +1,5 @@
 import {graphQLRequest} from '/helper/graphql.js';
-import { LitElement, html } from 'https://unpkg.com/lit-element/lit-element.js?module'
+import { LitElement, html } from 'https://unpkg.com/lit-element/lit-element.js?module';
 
 const request = `query Member($club: String!, $member: String!) {
                     member(club:$club, id:$member)){

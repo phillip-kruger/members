@@ -7,12 +7,12 @@ export class SimpleGreeting extends LitElement {
     
     static properties = {
         club: {type: String},
-        fields: {type: String},
+        members: {type: String},
     };
 
     constructor(){
         super();
-        this.fields = "name surname email"; // default
+        this.members = "name surname email"; // default
     }
 
     render() {
@@ -24,22 +24,20 @@ export class SimpleGreeting extends LitElement {
                             }
                         }`;
         
-        
-        
         var content = graphQLRequest(request, variables, "MembersAll").then(response => {
-            var members = response.data.members;
+            var membersResponse = response.data.members;
             var errors = response.errors;
             
-            if(members === null && errors !== null){
+            if(membersResponse === null && errors !== null){
                 return "There are errors";
             }else{
-                var requestedFields = this.fields.split(" ");
+                var membersFields = this.members.split(" ");
                 return html`
                 <div class="members">
-                    ${members.map(member => html`
-                        ${requestedFields.map(field => html`
+                    ${membersResponse.map(memberResponse => html`
+                        ${membersFields.map(field => html`
                             <div class="member id">
-                                ${member[field]}
+                                ${memberResponse[field]}
                             </div>
                         `)}
                     `)}

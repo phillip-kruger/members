@@ -1,8 +1,17 @@
 {
     "elements": {
         "simple-greeting": {},
+        "member-id": {},
+        "members-all-1": {},
         "members-all": {},
-        "members-single": {}
+        "member-name": {},
+        "member-email": {},
+        "members-single": {},
+        "member-field2": {},
+        "members-one": {},
+        "member-field1": {},
+        "members-nesting": {},
+        "member-surname": {}
     },
     "attributes": {}
 }

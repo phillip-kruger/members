@@ -139,6 +139,7 @@ public class DataImportService {
     
     private void importMemberOf(String club, String id, List<String> memberships) {
         memberService.memberJoinMemberships(club,id, memberships);
+        memberService.memberLeaveMembership(club, id, "default-roles-quarkus");
     }
     
     private static final String SPACE = " ";

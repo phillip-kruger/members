@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>Members One</title>
+        <meta charset="UTF-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.3/css/bulma.min.css">
+        
+        <style>
+            members-one::part(members-table) {
+                background: red;
+                color: white;
+            }
+        </style>
+        
+    </head>
+    <body>
+        <section class="section">
+            <div class="container">
+                <h1 class="title">
+                    Members One
+                </h1>
+
+                <members-one club="quarkus" members="name surname"></members-one>
+            </div>
+        </section>
+
+
+        <script src="members-one.js" type="module"></script>
+    </body>
+</html>
