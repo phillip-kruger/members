@@ -2,9 +2,8 @@ import {graphQLRequest} from '/helper/graphql.js';
 
 import {LitElement, html, css} from 'https://unpkg.com/lit@2.0.0/index.js?module';
 import {until} from 'https://unpkg.com/lit@2.0.0/directives/until.js?module';
-import styles from 'https://cdn.jsdelivr.net/npm/bulma@0.9.3/css/bulma.min.css';
 
-export class MembersOne extends LitElement {
+export class MemberList extends LitElement {
     
     static properties = {
         club: {type: String},
@@ -30,7 +29,7 @@ export class MembersOne extends LitElement {
             }else{
                 
                 return html`
-                    <table part="members-table">
+                    <table part="member-list">
                         <thead>
                             <tr>
                                 <th>Name</th>
@@ -58,4 +57,4 @@ export class MembersOne extends LitElement {
     };
 };
 
-customElements.define('members-one', MembersOne);
+customElements.define('member-list', MemberList);

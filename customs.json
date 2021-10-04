@@ -1,17 +1,23 @@
 {
     "elements": {
+        "members-two": {},
+        "member-name": {},
+        "members-single": {},
+        "members-three": {},
+        "member-field2": {},
+        "members-one": {},
+        "member-field1": {},
+        "member-list": {},
+        "member-surname": {},
+        "membership-type": {},
         "simple-greeting": {},
         "member-id": {},
         "members-all-1": {},
         "members-all": {},
-        "member-name": {},
+        "membership-types": {},
         "member-email": {},
-        "members-single": {},
-        "member-field2": {},
-        "members-one": {},
-        "member-field1": {},
-        "members-nesting": {},
-        "member-surname": {}
+        "id": {},
+        "members-nesting": {}
     },
     "attributes": {}
 }
