@@ -1,9 +1,9 @@
-import {graphQLRequest} from '/helper/graphql.js';
+import {graphQLRequest} from '/graphql.js';
 
 import {LitElement, html, css} from 'https://unpkg.com/lit@2.0.0/index.js?module';
 import {until} from 'https://unpkg.com/lit@2.0.0/directives/until.js?module';
 
-export class MemberList extends LitElement {
+export class MemberTable extends LitElement {
     
     static properties = {
         club: {type: String},
@@ -57,4 +57,4 @@ export class MemberList extends LitElement {
     };
 };
 
-customElements.define('member-list', MemberList);
+customElements.define('member-table', MemberTable);

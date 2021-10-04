@@ -1,8 +1,5 @@
 /* 
  * Some graphql related helper functions
- * @author Phillip Kruger (phillip.kruger@gmail.com)
- * 
- * TODO: Add authentication
  */
 const documentpath = '/graphql';
 
