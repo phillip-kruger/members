@@ -1,4 +1,4 @@
-package technology.overcast.members;
+package technology.overcast.member;
 
 import java.security.SecureRandom;
 import java.util.Collections;

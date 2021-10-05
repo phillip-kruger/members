@@ -19,8 +19,8 @@ import technology.overcast.clubs.model.Club;
 import technology.overcast.clubs.ClubService;
 import technology.overcast.member.model.Gender;
 import technology.overcast.member.model.Member;
-import technology.overcast.members.MemberExistAlreadyException;
-import technology.overcast.members.MemberService;
+import technology.overcast.member.MemberExistAlreadyException;
+import technology.overcast.member.MemberService;
 
 /**
  * Application Lifecycle

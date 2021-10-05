@@ -1,4 +1,4 @@
-package technology.overcast.members;
+package technology.overcast.member;
 
 /**
  * Exception when trying to create a member that exist already

@@ -1,4 +1,4 @@
-package technology.overcast.members;
+package technology.overcast.member;
 
 import technology.overcast.member.model.Member;
 import java.util.List;
@@ -33,32 +33,27 @@ public class MemberApi {
     }
     
     @Query
-    //@Authenticated
     public List<Member> getMembers(String club) {
         requestContext.setClub(club);
         return memberService.getMembers(club);
     }
     
     @Query
-    //@Authenticated
     public Member getMember(String club, String id) {
         requestContext.setClub(club);
         return memberService.getMember(club, id);
     }
     
     @Query
-    //@Authenticated
     public List<Member> searchMembers(String club, Optional<String> username,Optional<String> email) {
         requestContext.setClub(club);
         return memberService.searchMembers(club, username, email);
     }
     
-//    @Authenticated
     public List<List<MembershipType>> getMembershipTypes(@Source List<Member> members){
         return memberService.getMembershipTypes(requestContext.getClub(), members);
     }
     
-//    @Authenticated
     public List<Member> getMembers(@Source MembershipType membershipType){
         return memberService.getMembers(requestContext.getClub(), membershipType);
     }

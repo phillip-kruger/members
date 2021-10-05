@@ -1,4 +1,4 @@
-package technology.overcast.members;
+package technology.overcast.member;
 
 import io.quarkus.cache.CacheInvalidateAll;
 import io.quarkus.cache.CacheResult;

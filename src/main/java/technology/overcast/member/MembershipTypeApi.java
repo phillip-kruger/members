@@ -1,4 +1,4 @@
-package technology.overcast.members;
+package technology.overcast.member;
 
 import javax.annotation.security.RolesAllowed;
 import org.eclipse.microprofile.graphql.GraphQLApi;

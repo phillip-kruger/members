@@ -43,36 +43,19 @@ export class MemberTable extends LitElement {
                 var membersFields = this.fields.split(" ");
                 return html`
                 
-                    <table part="members-table">
-                        <thead>
-                            <tr>
-                                ${membersFields.map(field => html`
-                                    <th>
-                                        ${camelize(field)}
-                                    </th>
-                                `)}
-                                ${[...innerQueries.keys()].map(key => html`
-                                    
-                                    ${innerQueries.get(key).split(" ").map(innerField => html`
-                                    <th>
-                                        ${camelize(key) + " " + camelize(innerField)}
-                                    </th>    
-                                    `)}
-                                `)}
-                            </tr>
-                        </thead>
-                        <tbody>
+                    <table part="table">
+                        <tbody part="tbody">
                             ${membersResponse.map(memberResponse => html`
-                            <tr>
+                            <tr part="tr">
                                 ${membersFields.map(field => html`
-                                    <td>
+                                    <td part="td">
                                         ${memberResponse[field]}
                                     </td>
                                 `)}
                                 
                                 ${[...innerQueries.keys()].map(key => html`
                                     ${innerQueries.get(key).split(" ").map(innerField => html`
-                                        <td>
+                                        <td part="td">
                                         ${memberResponse[key].map(value => html`
                                             ${value[innerField]}
                                         `)}
@@ -90,13 +73,6 @@ export class MemberTable extends LitElement {
     };
     
 };
-
-
-// From aB to A b
-function camelize(str) {
-    var f = str.charAt(0);
-    return f.toUpperCase() + str.slice(1);
-}
 
 // From a-b to aB
 function camelCase(input) { 
