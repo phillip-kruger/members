@@ -17,7 +17,7 @@ export class MemberTable extends LitElement {
 
     render() {
         
-        var variables = {"club": this.club};
+        const variables = {"club": this.club};
         
         const innerQueries = new Map();
 
@@ -26,21 +26,21 @@ export class MemberTable extends LitElement {
             return camelCase(n.nodeName.toLowerCase()) + "{" + n.getAttribute("fields") + "}";
         }).join(' ');
         
-        var request =   `query MembersAll($club: String!) {
+        const request =   `query MembersAll($club: String!) {
                             members(club:$club){` 
                                 + this.fields + ` ` + nodes + 
                             `}
                         }`;
           
-        var content = graphQLRequest(request, variables, "MembersAll").then(response => {
-            var membersResponse = response.data.members;
-            var errors = response.errors;
+        const content = graphQLRequest(request, variables, "MembersAll").then(response => {
+            const membersResponse = response.data.members;
+            const errors = response.errors;
             
             if(membersResponse === null && errors !== null){
                 return "There are errors";
             }else{
                 
-                var membersFields = this.fields.split(" ");
+                const membersFields = this.fields.split(" ");
                 return html`
                 
                     <table part="table">
