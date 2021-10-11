@@ -19,7 +19,7 @@ import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 @ApplicationScoped
 @Path("/member")
 @Consumes(MediaType.APPLICATION_JSON) @Produces(MediaType.APPLICATION_JSON)
-@Tag(name = "Person service",description = "Person Services")
+@Tag(name = "Member service",description = "Member management Services")
 public class MemberRestApi {
 
     @Inject
