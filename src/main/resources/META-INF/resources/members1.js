@@ -35,7 +35,6 @@ export class MemberTable extends LitElement {
                                 <th>Name</th>
                                 <th>Surname</th>
                                 <th>Email</th>
-                                <th></th>
                             </tr>
                         </thead>
                         <tbody>
@@ -44,7 +43,6 @@ export class MemberTable extends LitElement {
                                 <td>${memberResponse['name']}</td>
                                 <td>${memberResponse['surname']}</td>
                                 <td>${memberResponse['email']}</td>
-                                <td></td>
                             </tr>
                             `)}
                         </tbody>
