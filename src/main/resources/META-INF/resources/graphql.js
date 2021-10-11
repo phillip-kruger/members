@@ -1,15 +1,7 @@
 /* 
  * Some graphql related helper functions
  */
-let documentpath = '/graphql';
-
-const scriptTags = document.scripts;
-for (let i = 0; i < scriptTags.length; i++) {
-    let url = new URL(scriptTags[i].src);
-    if(url.pathname.includes("/members") && url.pathname.endsWith(".js")){
-        documentpath = url.origin + documentpath;
-    }
-}
+let documentpath = 'http://localhost:9090/graphql';
 
 export async function graphQLRequest(query, variables = {}, operationName = ""){
     

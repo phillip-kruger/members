@@ -18,7 +18,8 @@
         "member-email": {},
         "member-table": {},
         "id": {},
-        "members-nesting": {}
+        "members-nesting": {},
+        "member-text": {}
     },
     "attributes": {}
 }
