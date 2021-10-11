@@ -29,7 +29,7 @@ export class MemberTable extends LitElement {
             }else{
                 
                 return html`
-                    <table part="member-list">
+                    <table>
                         <thead>
                             <tr>
                                 <th>Name</th>
