@@ -220,6 +220,11 @@ public class MemberService {
         }
     }
     
+    public List<MembershipType> getMembershipTypes(String club, Member member){
+        List<List<MembershipType>> membershipTypes = getMembershipTypes(club, List.of(member));
+        return membershipTypes.get(0);
+    }
+    
     public List<List<MembershipType>> getMembershipTypes(String club, List<Member> members){
         club = club.toLowerCase();
         List<List<MembershipType>> bulk = new ArrayList<>();
