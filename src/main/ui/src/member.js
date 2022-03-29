@@ -1,7 +1,8 @@
-import {graphQLRequest} from '/graphql.js';
+import {graphQLRequest} from './graphql.js';
 
-import {LitElement, html} from 'https://unpkg.com/lit@2.0.2/index.js?module';
-import {until} from 'https://unpkg.com/lit@2.0.2/directives/until.js?module';
+import {LitElement, html, css} from 'lit';
+import {until} from 'lit/directives/until.js';
+
 
 export class MemberText extends LitElement {
     
