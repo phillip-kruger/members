@@ -1,0 +1,22 @@
+{
+    "name": "members-webui",
+    "version": "0.0.0",
+    "private": true,
+    "scripts": {
+        "build": "if [[ $MODE == \"dev\" ]]; then webpack --mode=development; else webpack --mode=production; fi",
+        "test": ""
+    },
+    "dependencies": {
+        "lit": "^2.2.1"
+    },
+    "browser": {
+        "[module-name]": false
+    },
+    "devDependencies": {
+        "copy-webpack-plugin": "^10.2.4",
+        "webpack": "^5.70.0",
+        "webpack-cli": "^4.9.2",
+        "glob": "^8.0.3",
+        "path": "^0.12.7"
+    }
+}
